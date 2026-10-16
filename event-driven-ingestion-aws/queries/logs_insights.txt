@@ -1,0 +1,10 @@
+# Run in CloudWatch -> Logs Insights (select Lambda log groups)
+fields @timestamp, @message
+| filter @message like /ERROR|Exception/
+| sort @timestamp desc | limit 20
+
+filter @type = "REPORT"
+| stats count() as invocations, avg(@duration) as avgMs, max(@duration) as maxMs by bin(5m)
+
+filter @type = "REPORT" and ispresent(@initDuration)
+| stats count() as coldStarts, avg(@initDuration) by bin(15m)
